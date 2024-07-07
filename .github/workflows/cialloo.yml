@@ -1,0 +1,46 @@
+name: Build and Upload Artifacts
+
+on:
+  push:
+    branches:
+      - cialloo
+  pull_request:
+    branches:
+      - cialloo
+
+jobs:
+  build-and-upload:
+    name: Build and Upload Artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.16.5'
+
+      - name: Build Go binary
+        run: go build -o casdoor ./main.go
+        working-directory: ./
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: yarn install
+        working-directory: ./web
+
+      - name: Build web static files
+        run: yarn run build
+        working-directory: ./web
+
+      - name: Upload working directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: working-directory
+          path: ./
